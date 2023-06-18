@@ -73,6 +73,11 @@ public class Game {
            gameStatus = GameStatus.ENDED;
            winner = toMovePlayer;
         }
+        // Check the game status
+        int totalPossibleMoves = board.getBoard().size()*board.getBoard().size();
+        if (this.moves.size() == totalPossibleMoves){
+            gameStatus =GameStatus.DRAW;
+        }
 
         nextPlayerIndex += 1;
         nextPlayerIndex %= players.size();

@@ -71,8 +71,11 @@ public class TicTacToeGame {
 
         if(!game.getGameStatus().equals(GameStatus.DRAW)){
             System.out.println("Winner is: ." + gameController.getWinner(game).getName());
-            gameController.displayBoard(game);
+        }else {
+            System.out.println("Draw Game!!");
         }
+
+        gameController.displayBoard(game);
 
     }
 }
