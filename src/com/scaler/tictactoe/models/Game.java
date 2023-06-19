@@ -39,10 +39,41 @@ public class Game {
         return new Builder();
     }
 
-    public void undo() {}
+    public void undo() {
+
+        int currSize = this.moves.size();
+
+        if (currSize == 0) {
+            System.out.println("no more undo can be performed");
+        }else{
+            Move undoMove = this.moves.get(currSize-1);
+            int row = undoMove.getCell().getRow();
+            int col = undoMove.getCell().getCol();
+
+            System.out.println("Undo happened at: " + row + "," + col + ".");
+
+            // update board
+            board.getBoard().get(row).get(col).setCellState(CellState.EMPTY);
+            //board.getBoard().get(row).get(col).setPlayer(toMovePlayer);
+
+            this.moves.remove(currSize-1);
+            System.out.println("nextPlayerIndex before "+this.nextPlayerIndex);
+            if (this.nextPlayerIndex == 0){
+                this.nextPlayerIndex += (players.size()-1);
+            }else{
+                this.nextPlayerIndex -= 1;
+            }
+
+            System.out.println("nextPlayerIndex "+this.nextPlayerIndex);
+
+        }
+
+
+
+    }
 
     public void makeNextMove() {
-        Player toMovePlayer = players.get(nextPlayerIndex);
+        Player toMovePlayer = players.get(this.nextPlayerIndex);
 
         System.out.println("It is " + toMovePlayer.getName() + "'s turn.");
 
@@ -50,37 +81,43 @@ public class Game {
 
         // Validate the move
 
+
         int row = move.getCell().getRow();
         int col = move.getCell().getCol();
+        if (board.getBoard().get(row).get(col).getCellState().equals(CellState.FILLED)){
+            System.out.println("Cell at: " + row + "," + col + "is already filled");
+        }else{
+            System.out.println("Move happened at: " + row + "," + col + ".");
 
-        System.out.println("Move happened at: " + row + "," + col + ".");
+            // update board
+            board.getBoard().get(row).get(col).setCellState(CellState.FILLED);
+            board.getBoard().get(row).get(col).setPlayer(toMovePlayer);
 
-        // update board
-        board.getBoard().get(row).get(col).setCellState(CellState.FILLED);
-        board.getBoard().get(row).get(col).setPlayer(toMovePlayer);
+            Move finalMove = new Move(
+                    toMovePlayer,
+                    board.getBoard().get(row).get(col)
+            );
 
-        Move finalMove = new Move(
-                toMovePlayer,
-                board.getBoard().get(row).get(col)
-        );
+            this.moves.add(finalMove);
 
-        this.moves.add(finalMove);
+            // Check the winner
+            if(gameWinningStrategy.checkWinner(
+                    board, toMovePlayer, finalMove.getCell()
+            )){
+                gameStatus = GameStatus.ENDED;
+                winner = toMovePlayer;
+            }
+            // Check the game status
+            int totalPossibleMoves = board.getBoard().size()*board.getBoard().size();
+            if (this.moves.size() == totalPossibleMoves){
+                gameStatus =GameStatus.DRAW;
+            }
 
-        // Check the winner
-        if(gameWinningStrategy.checkWinner(
-                board, toMovePlayer, finalMove.getCell()
-        )){
-           gameStatus = GameStatus.ENDED;
-           winner = toMovePlayer;
+            this.nextPlayerIndex += 1;
+            this.nextPlayerIndex %= players.size();
         }
-        // Check the game status
-        int totalPossibleMoves = board.getBoard().size()*board.getBoard().size();
-        if (this.moves.size() == totalPossibleMoves){
-            gameStatus =GameStatus.DRAW;
-        }
 
-        nextPlayerIndex += 1;
-        nextPlayerIndex %= players.size();
+
 
     }
 
